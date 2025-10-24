@@ -1,14 +1,39 @@
 import axios from 'axios';
+import { config } from '../config/environment';
 
 // Configuração base da API
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = config.API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // Timeout de 10 segundos
 });
+
+// Interceptor para logs de debug
+api.interceptors.request.use(
+  (config) => {
+    console.log('🚀 Enviando requisição:', config.method?.toUpperCase(), config.url);
+    return config;
+  },
+  (error) => {
+    console.error('❌ Erro na requisição:', error);
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => {
+    console.log('✅ Resposta recebida:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('❌ Erro na resposta:', error.response?.status, error.message);
+    return Promise.reject(error);
+  }
+);
 
 // Serviços para Pessoa
 export const pessoaService = {
